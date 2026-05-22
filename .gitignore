@@ -1,3 +1,8 @@
-.venv/
+﻿# Модель (слишком большая)
 model/
 results/
+*.safetensors
+*.bin
+
+# Виртуальное окружение
+.venv/
