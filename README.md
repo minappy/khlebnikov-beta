@@ -58,7 +58,7 @@ python trainer.py
 ### 7. Запустите генератор
 
 ```bash
-python simple_app.py
+python app.py
 ```
 
 Откройте браузер: http://127.0.0.1:8080
