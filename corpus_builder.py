@@ -48,19 +48,20 @@ OKKAZIONALIZMS = {
 
 
 def clean_poem_text(text):
-    """Удаляет заголовки, имена автора, навигацию — оставляет только стихи"""
     lines = text.split('\n')
     clean_lines = []
     skip_patterns = [
-        r'^\s*$',  # пустые строки
-        r'^(предыдущий|следующий|содержание|вверх|назад)',  # навигация
-        r'^В\.? ?Хлебников',  # имя автора
-        r'^ТВОРЕНИЯ',  # заголовок раздела
-        r'^Собрание',  # заголовок
-        r'^©',  # копирайт
-        r'^http',  # ссылки
-        r'^\d{4}$',  # только год
-        r'^[IVX]+\.',  # римские цифры с точкой
+        r'^\s*$',
+        r'^(предыдущий|следующий|содержание|вверх|назад)',
+        r'^В\.? ?Хлебников',
+        r'^ТВОРЕНИЯ',
+        r'^Собрание',
+        r'^©',
+        r'^http',
+        r'^\d{4}$',
+        r'^[IVX]+\.',
+        r'^Примечания',
+        r'^Ред\.',
     ]
 
     for line in lines:
@@ -107,13 +108,11 @@ for i, url in enumerate(poems[:100]):
         else:
             raw_text = s.body.get_text() if s.body else ""
 
-        # Только чистый текст стиха
         clean_text = clean_poem_text(raw_text)
 
-        if len(clean_text) > 100:
+        if len(clean_text) > 80:
             texts.append(clean_text)
 
-            # N-граммы
             char_2 = compute_char_ngrams(clean_text, 2)
             char_3 = compute_char_ngrams(clean_text, 3)
             all_char_2grams.update(char_2)
@@ -136,13 +135,11 @@ for i, url in enumerate(poems[:100]):
     except Exception as e:
         print(f"Skip {i + 1}: {e}")
 
-# Сохраняем только чистые тексты
 with open('corpus.jsonl', 'w', encoding='utf-8') as f:
     for t in texts:
         f.write(json.dumps({'text': t}, ensure_ascii=False) + '\n')
 
-# Статистика
-stats = {
+ngrams_stats = {
     'total_poems': len(texts),
     'unique_char_2grams': len(all_char_2grams),
     'unique_char_3grams': len(all_char_3grams),
@@ -157,14 +154,14 @@ stats = {
 }
 
 with open('ngrams_stats.json', 'w', encoding='utf-8') as f:
-    json.dump(stats, f, ensure_ascii=False, indent=2)
+    json.dump(ngrams_stats, f, ensure_ascii=False, indent=2)
 
 print(f"\n{'=' * 50}")
-print(f"КОРПУС СОБРАН (только стихи):")
-print(f"  Стихов: {stats['total_poems']}")
-print(f"  Буквенных 2-грамм: {stats['unique_char_2grams']}")
-print(f"  Буквенных 3-грамм: {stats['unique_char_3grams']}")
-print(f"  Словесных биграмм: {stats['unique_word_2grams']}")
-print(f"  Словесных триграмм: {stats['unique_word_3grams']}")
-print(f"  Окказионализмов: {stats['okkazionalizms_found']}")
+print(f"КОРПУС И N-ГРАММЫ СОБРАНЫ:")
+print(f"  Стихов: {ngrams_stats['total_poems']}")
+print(f"  Буквенных 2-грамм: {ngrams_stats['unique_char_2grams']}")
+print(f"  Буквенных 3-грамм: {ngrams_stats['unique_char_3grams']}")
+print(f"  Словесных биграмм: {ngrams_stats['unique_word_2grams']}")
+print(f"  Словесных триграмм: {ngrams_stats['unique_word_3grams']}")
+print(f"  Окказионализмов: {ngrams_stats['okkazionalizms_found']}")
 print(f"{'=' * 50}")
